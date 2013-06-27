@@ -1,4 +1,28 @@
-module Data.Tile where
+module Data.Tile
+(
+-- * Tile
+  Tile
+, distance
+, enumDistance
+-- ** Enumerations
+, allIndices
+, enumRange
+-- ** Neighboring tiles
+, neighbors
+, adjacent
+-- ** Comparison
+, closerTo
+-- ** Paths
+, stepToward
+, pathsToward
+-- * Hexagonal tilings
+, Hex
+, hex
+, hexIndex
+, projectHorizontal
+, projectVertical
+)
+where
 
 import Data.Monoid
 import Data.Ord ( comparing )
@@ -14,7 +38,7 @@ class (Eq v, Monoid v) => Tile v where
     enumDistance :: Int -> [v]
 
 
--- | List all indices in the coordinate system.
+-- | Enumerate all indices in the coordinate system.
 allIndices :: (Tile v) => [v]
 allIndices = concatMap enumDistance [0..]
 
@@ -23,7 +47,7 @@ allIndices = concatMap enumDistance [0..]
 enumRange :: (Tile v) => Int -> [v]
 enumRange = concatMap enumDistance . enumFromTo 0
 
--- | Determine if two indices are adjacent.
+-- | Determine if two tiles are adjacent.
 adjacent :: (Tile v) => v -> v -> Bool
 adjacent a b = distance a b == 1
 
@@ -31,11 +55,19 @@ adjacent a b = distance a b == 1
 neighbors :: (Tile v) => v -> [v]
 neighbors v = map (v <>) (enumDistance 1)
 
+
 -- TODO IMPROVE
+
+-- | @closerTo d a b@ compares the distance of @a@ to @d@ to the distance
+-- of @b@ to @d@.
 closerTo :: (Tile v) => v -> v -> v -> Ordering
 closerTo to = comparing (distance to)
 
+
 -- TODO IMPROVE
+
+-- | @stepToward d s@ is the list of tiles adjacent to @s@ that are of
+-- minimal distance to @d@. @stepToward a a == []@.
 stepToward :: (Tile v) => v -> v -> [v]
 stepToward to from
   | to == from = []
@@ -43,6 +75,7 @@ stepToward to from
   where
     closest = minimumsWith (distance to) $ from : neighbors from
 
+-- | @pathsToward d s@ is the list of all minimal paths from @s@ to @d@.
 pathsToward :: (Tile v) => v -> v -> [[v]]
 pathsToward to = map stepPath . stepToward to
   where
@@ -50,31 +83,20 @@ pathsToward to = map stepPath . stepToward to
 
 
 
-minimums :: (Ord a) => [a] -> [a]
-minimums = minimumsBy compare
+-------------------------------------------------------------------------------
+-- Hexagonal tilings
+-------------------------------------------------------------------------------
 
-minimumsWith :: (Ord b) => (a -> b) -> [a] -> [a]
-minimumsWith f = minimumsBy $ comparing f
-
-minimumsBy :: (a -> a -> Ordering) -> [a] -> [a]
-minimumsBy _ [] = []
-minimumsBy f (x:xs) = reverse $ go x [] xs
-  where
-    go a ms [] = a:ms
-    go a ms (x:xs) =
-        case f a x of
-            EQ -> go x (a:ms) xs
-            LT -> go a ms xs
-            GT -> go x [] xs
-
-
-
-
-data Hex = Hex !Int !Int
+data Hex = Hex
+    {-# UNPACK #-} !Int
+    {-# UNPACK #-} !Int
     deriving (Show, Eq, Ord)
 
-unHex :: Hex -> (Int, Int)
-unHex (Hex i j) = (i, j)
+hex :: Int -> Int -> Hex
+hex = Hex
+
+hexIndex :: Hex -> (Int, Int)
+hexIndex (Hex i j) = (i, j)
 
 
 instance Monoid Hex where
@@ -107,7 +129,7 @@ instance Tile Hex where
             , Hex   0  (-1)
             ]
 
--- | Determine the cartesian position of a Hex in a horizontal grid
+-- | Determine the position of the Hex in a horizontal tesselation on a plane
 projectHorizontal :: Hex -> (Double, Double)
 projectHorizontal (Hex i j) = (- sqrt 3 * (y/2 - x), y * 3 / 2)
   where
@@ -115,6 +137,7 @@ projectHorizontal (Hex i j) = (- sqrt 3 * (y/2 - x), y * 3 / 2)
     y = fromIntegral j
     v = 1.366025  -- distance between two tiles along skewed dimension
 
+-- | Determine the position of the Hex in a vertical tesselation on a plane
 projectVertical :: Hex -> (Double, Double)
 projectVertical (Hex i j) = (x * 3 / 2, - sqrt 3 * (x/2 - y))
   where
@@ -122,32 +145,29 @@ projectVertical (Hex i j) = (x * 3 / 2, - sqrt 3 * (x/2 - y))
     y = fromIntegral j
 
 
-{-
-data Grid v = Grid
-    { contains  :: v -> Bool
-    , generator :: Maybe (Generate v)
-    } 
+-------------------------------------------------------------------------------
+-- internally used functions
+-------------------------------------------------------------------------------
 
-data Generate v = G
-    { eSize :: Int
-    , eList :: [v]
-    }
-
-total :: (Tile v) => Grid v
-total = Grid (const True) Nothing
-
-filterGrid :: (v -> Bool) -> Grid v -> Grid v
-filterGrid p (Grid c g) = Grid (\v -> p v && c v) g
-
-
-bounded :: Grid v -> Bool
-bounded = isJust . generator
-
--- | The size of the Grid.
+-- | @minimumsWith f xs@ is the list of minimum values @f x@ for every @x@ in
+-- @xs@.
 --
--- @size g = undefined@ iff @bounded g = False@
-size :: Grid v -> Int
-size g = case generator g of
-             Just gen -> eSize gen
-             Nothing  -> undefined
--}
+-- example:
+--
+-- @
+-- minimumsWith length ["three", "four", "five"]  =  ["four", "five"]
+-- @
+minimumsWith :: (Ord b) => (a -> b) -> [a] -> [a]
+minimumsWith f = minimumsBy $ comparing f
+
+minimumsBy :: (a -> a -> Ordering) -> [a] -> [a]
+minimumsBy _ [] = []
+minimumsBy f (x:xs) = reverse $ go x [] xs
+  where
+    go a ms [] = a:ms
+    go a ms (x:xs) =
+        case f a x of
+            EQ -> go x (a:ms) xs
+            LT -> go a ms xs
+            GT -> go x [] xs
+
