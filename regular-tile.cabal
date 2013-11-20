@@ -1,6 +1,6 @@
 name:                regular-tile
-version:             0.1.0.0
--- synopsis:            
+version:             0.1.0.1
+synopsis:            regular tilings of a plane
 -- description:         
 license:             BSD3
 license-file:        LICENSE
@@ -15,3 +15,14 @@ library
   exposed-modules:     Data.Tile
   -- other-modules:
   build-depends:       base ==4.6.*
+
+Test-Suite properties
+    type:               exitcode-stdio-1.0
+    main-is:            properties.hs
+    ghc-options:        -w
+    hs-source-dirs:     tests
+    build-depends:      regular-tile,
+                        base,
+                        QuickCheck        ==2.6.*,
+                        tasty-th          ==0.1.*,
+                        tasty-quickcheck  ==0.3.*
