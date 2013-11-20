@@ -15,10 +15,11 @@ module Data.Tile
 -- ** Paths
 , stepToward
 , pathsToward
--- * Hexagonal tilings
-, Hex
-, hex
-, hexIndex
+-- * Tiling types
+-- ** Square
+, Square(..)
+-- ** Hex
+, Hex(..)
 , projectHorizontal
 , projectVertical
 )
@@ -28,17 +29,23 @@ import Data.Monoid
 import Data.Ord ( comparing )
 
 
-
-
 class (Eq v, Monoid v) => Tile v where
+
     -- | @distance a b == 0@ iff @a == b@
     distance :: v -> v -> Int
+
     -- | Return a finite list of all indices at a given distance from the
-    -- origin.
+    -- origin. @t `elem` enumDistance i@ iff @distance mempty t == i@.
+    --
+    -- @
+    -- enumDistance 0 = [mempty]
+    -- @
+    --
     enumDistance :: Int -> [v]
 
 
--- | Enumerate all indices in the coordinate system.
+-- | Enumerate all indices in the coordinate system, in ascending order of
+-- distance from the origin.
 allIndices :: (Tile v) => [v]
 allIndices = concatMap enumDistance [0..]
 
@@ -80,6 +87,31 @@ pathsToward :: (Tile v) => v -> v -> [[v]]
 pathsToward to = map stepPath . stepToward to
   where
     stepPath s = concatMap (s:) $ pathsToward to s
+
+
+-------------------------------------------------------------------------------
+-- Square tilings
+-------------------------------------------------------------------------------
+
+data Square = Square
+    {-# UNPACK #-} !Int
+    {-# UNPACK #-} !Int
+    deriving (Show, Eq, Ord)
+
+instance Monoid Square where
+    mempty = Square 0 0
+    Square x y `mappend` Square x' y' = Square (x+x') (y+y')
+
+instance Tile Square where
+    distance (Square x y) (Square x' y') = abs (x - x') + abs (y - y')
+
+    enumDistance 0 = [Square 0 0]
+    enumDistance n = (\ss -> ss ++ map negateSquare ss)
+                   . map (\i -> Square i $ n - i)
+                   $ enumFromTo 0 n
+      where
+        negateSquare :: Square -> Square
+        negateSquare (Square i j) = Square (-i) (-j)
 
 
 
@@ -135,7 +167,6 @@ projectHorizontal (Hex i j) = (- sqrt 3 * (y/2 - x), y * 3 / 2)
   where
     x = fromIntegral i
     y = fromIntegral j
-    v = 1.366025  -- distance between two tiles along skewed dimension
 
 -- | Determine the position of the Hex in a vertical tesselation on a plane
 projectVertical :: Hex -> (Double, Double)
