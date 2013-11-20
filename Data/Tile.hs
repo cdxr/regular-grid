@@ -32,7 +32,7 @@ import Data.Ord ( comparing )
 class (Eq v, Monoid v) => Tile v where
 
     -- | @distance a b == 0@ iff @a == b@
-    distance :: v -> v -> Int
+    distance :: v -> v -> Integer
 
     -- | Return a finite list of all indices at a given distance from the
     -- origin. @t `elem` enumDistance i@ iff @distance mempty t == i@.
@@ -41,7 +41,7 @@ class (Eq v, Monoid v) => Tile v where
     -- enumDistance 0 = [mempty]
     -- @
     --
-    enumDistance :: Int -> [v]
+    enumDistance :: Integer -> [v]
 
 
 -- | Enumerate all indices in the coordinate system, in ascending order of
@@ -51,7 +51,7 @@ allIndices = concatMap enumDistance [0..]
 
 -- | Return a finite list of all indices at a given distance or less from
 -- the origin.
-enumRange :: (Tile v) => Int -> [v]
+enumRange :: (Tile v) => Integer -> [v]
 enumRange = concatMap enumDistance . enumFromTo 0
 
 -- | Determine if two tiles are adjacent.
@@ -93,9 +93,7 @@ pathsToward to = map stepPath . stepToward to
 -- Square tilings
 -------------------------------------------------------------------------------
 
-data Square = Square
-    {-# UNPACK #-} !Int
-    {-# UNPACK #-} !Int
+data Square = Square !Integer !Integer
     deriving (Show, Eq, Ord)
 
 instance Monoid Square where
@@ -119,15 +117,13 @@ instance Tile Square where
 -- Hexagonal tilings
 -------------------------------------------------------------------------------
 
-data Hex = Hex
-    {-# UNPACK #-} !Int
-    {-# UNPACK #-} !Int
+data Hex = Hex !Integer !Integer
     deriving (Show, Eq, Ord)
 
-hex :: Int -> Int -> Hex
+hex :: Integer -> Integer -> Hex
 hex = Hex
 
-hexIndex :: Hex -> (Int, Int)
+hexIndex :: Hex -> (Integer, Integer)
 hexIndex (Hex i j) = (i, j)
 
 
@@ -152,7 +148,7 @@ instance Tile Hex where
                 x:xs -> walk xs $ step <> x
 
         start = Hex n 0
-        relativePath = init $ concatMap (replicate n)
+        relativePath = init $ concatMap (replicate $ fromIntegral n)
             [ Hex (-1) (-1)
             , Hex (-1)   0
             , Hex   0    1
