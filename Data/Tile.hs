@@ -104,13 +104,11 @@ instance Tile Square where
     distance (Square x y) (Square x' y') = abs (x - x') + abs (y - y')
 
     enumDistance 0 = [Square 0 0]
-    enumDistance n = (\ss -> ss ++ map negateSquare ss)
-                   . map (\i -> Square i $ n - i)
-                   $ enumFromTo 0 n
+    enumDistance n =
+        [Square i (n - abs i) | i <- reverse range]
+        ++ init (drop 1 [Square i (-n + abs i) | i <- range])
       where
-        negateSquare :: Square -> Square
-        negateSquare (Square i j) = Square (-i) (-j)
-
+        range = [-n..n]
 
 
 -------------------------------------------------------------------------------
