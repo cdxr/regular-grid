@@ -118,13 +118,6 @@ instance Tile Square where
 data Hex = Hex !Integer !Integer
     deriving (Show, Eq, Ord)
 
-hex :: Integer -> Integer -> Hex
-hex = Hex
-
-hexIndex :: Hex -> (Integer, Integer)
-hexIndex (Hex i j) = (i, j)
-
-
 instance Monoid Hex where
     mempty = Hex 0 0
     Hex x y `mappend` Hex x' y' = Hex (x+x') (y+y')
