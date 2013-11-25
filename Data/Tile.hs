@@ -46,7 +46,7 @@ class (Eq v, Monoid v) => Tile v where
 
 
 -- | Enumerate all indices in the coordinate system, in ascending order of
--- distance from the origin.
+-- distance from the origin. The resulting list is infinite.
 allIndices :: (Tile v) => [v]
 allIndices = concatMap enumDistance [0..]
 
@@ -166,7 +166,7 @@ projectVertical (Hex i j) = (x * 3 / 2, - sqrt 3 * (x/2 - y))
 
 
 -------------------------------------------------------------------------------
--- internally used functions
+-- internal utilities
 -------------------------------------------------------------------------------
 
 -- | @minimumsWith f xs@ is the list of minimum values @f x@ for every @x@ in
