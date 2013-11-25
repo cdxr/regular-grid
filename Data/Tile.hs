@@ -32,6 +32,7 @@ where
 import Data.Monoid
 import Data.Ord ( comparing )
 import Data.Ix
+import Data.Hashable
 
 
 class (Eq v, Monoid v) => Tile v where
@@ -106,6 +107,9 @@ instance Monoid Quad where
     mempty = Quad 0 0
     Quad x y `mappend` Quad x' y' = Quad (x+x') (y+y')
 
+instance Hashable Quad where
+    hashWithSalt s (Quad i j) = hashWithSalt s (i, j)
+
 instance Tile Quad where
     distance (Quad x y) (Quad x' y') = abs (x - x') + abs (y - y')
 
@@ -129,6 +133,9 @@ instance Monoid Oct where
     mempty = Oct 0 0
     Oct x y `mappend` Oct x' y' = Oct (x+x') (y+y')
 
+instance Hashable Oct where
+    hashWithSalt s (Oct i j) = hashWithSalt s (i, j)
+
 instance Tile Oct where
     distance (Oct x y) (Oct x' y') = max (abs $ x - x') (abs $ y - y')
 
@@ -144,6 +151,9 @@ data Hex = Hex !Integer !Integer
 instance Monoid Hex where
     mempty = Hex 0 0
     Hex x y `mappend` Hex x' y' = Hex (x+x') (y+y')
+
+instance Hashable Hex where
+    hashWithSalt s (Hex i j) = hashWithSalt s (i, j)
     
 instance Tile Hex where
     distance (Hex x y) (Hex x' y') = maximum $ map abs [dy, dx, dy - dx]

@@ -14,7 +14,7 @@ cabal-version:       >=1.8
 library
   exposed-modules:     Data.Tile
   -- other-modules:
-  build-depends:       base ==4.6.*
+  build-depends:       base ==4.6.*, hashable ==1.2.*
 
 Test-Suite properties
     type:               exitcode-stdio-1.0
