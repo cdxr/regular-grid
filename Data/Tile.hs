@@ -18,6 +18,8 @@ module Data.Tile
 -- * Tiling types
 -- ** Quad
 , Quad(..)
+-- ** Oct
+, Oct(..)
 -- ** Hex
 , Hex(..)
 , projectHorizontal
@@ -112,6 +114,23 @@ instance Tile Quad where
       where
         range = [-n..n]
 
+
+-------------------------------------------------------------------------------
+-- Oct tilings
+-------------------------------------------------------------------------------
+
+-- | A tile with eight neighbors; chebyshev distance.
+data Oct = Oct !Integer !Integer
+    deriving (Show, Eq, Ord, Ix)
+
+instance Monoid Oct where
+    mempty = Oct 0 0
+    Oct x y `mappend` Oct x' y' = Oct (x+x') (y+y')
+
+instance Tile Oct where
+    distance (Oct x y) (Oct x' y') = max (abs $ x - x') (abs $ y - y')
+
+    -- TODO: implement enumDistance
 
 -------------------------------------------------------------------------------
 -- Hexagonal tilings
