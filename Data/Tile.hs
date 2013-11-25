@@ -16,8 +16,8 @@ module Data.Tile
 , stepToward
 , pathsToward
 -- * Tiling types
--- ** Square
-, Square(..)
+-- ** Quad
+, Quad(..)
 -- ** Hex
 , Hex(..)
 , projectHorizontal
@@ -27,6 +27,7 @@ where
 
 import Data.Monoid
 import Data.Ord ( comparing )
+import Data.Ix
 
 
 class (Eq v, Monoid v) => Tile v where
@@ -90,23 +91,24 @@ pathsToward to = map stepPath . stepToward to
 
 
 -------------------------------------------------------------------------------
--- Square tilings
+-- Quad tilings
 -------------------------------------------------------------------------------
 
-data Square = Square !Integer !Integer
-    deriving (Show, Eq, Ord)
+-- | A tile with four neighbors; rectilinear distance.
+data Quad = Quad !Integer !Integer
+    deriving (Show, Eq, Ord, Ix)
 
-instance Monoid Square where
-    mempty = Square 0 0
-    Square x y `mappend` Square x' y' = Square (x+x') (y+y')
+instance Monoid Quad where
+    mempty = Quad 0 0
+    Quad x y `mappend` Quad x' y' = Quad (x+x') (y+y')
 
-instance Tile Square where
-    distance (Square x y) (Square x' y') = abs (x - x') + abs (y - y')
+instance Tile Quad where
+    distance (Quad x y) (Quad x' y') = abs (x - x') + abs (y - y')
 
-    enumDistance 0 = [Square 0 0]
+    enumDistance 0 = [Quad 0 0]
     enumDistance n =
-        [Square i (n - abs i) | i <- reverse range]
-        ++ init (drop 1 [Square i (-n + abs i) | i <- range])
+        [Quad i (n - abs i) | i <- reverse range]
+        ++ init (drop 1 [Quad i (-n + abs i) | i <- range])
       where
         range = [-n..n]
 
@@ -116,7 +118,7 @@ instance Tile Square where
 -------------------------------------------------------------------------------
 
 data Hex = Hex !Integer !Integer
-    deriving (Show, Eq, Ord)
+    deriving (Show, Eq, Ord, Ix)
 
 instance Monoid Hex where
     mempty = Hex 0 0
