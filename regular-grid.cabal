@@ -1,6 +1,6 @@
-name:                regular-tile
+name:                regular-grid
 version:             0.1.0.1
-synopsis:            regular tilings of a plane
+synopsis:            operations on regular planar graphs
 -- description:         
 license:             BSD3
 license-file:        LICENSE
@@ -12,7 +12,7 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 library
-  exposed-modules:     Data.Tile
+  exposed-modules:     Data.Graph.Grid
   -- other-modules:
   build-depends:       base ==4.6.*, hashable ==1.2.*
 
@@ -21,7 +21,7 @@ Test-Suite properties
     main-is:            properties.hs
     ghc-options:        -w
     hs-source-dirs:     tests
-    build-depends:      regular-tile,
+    build-depends:      regular-grid,
                         base,
                         QuickCheck        ==2.6.*,
                         tasty-th          ==0.1.*,

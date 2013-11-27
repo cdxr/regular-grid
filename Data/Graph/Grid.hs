@@ -1,7 +1,7 @@
-module Data.Tile
+module Data.Graph.Grid
 (
--- * Tile
-  Tile
+-- * Vertex
+  Vertex
 , distance
 , enumDistance
 -- ** Enumerations
@@ -16,10 +16,10 @@ module Data.Tile
 , stepToward
 , pathsToward
 -- * Tiling types
--- ** Quad
-, Quad(..)
--- ** Oct
-, Oct(..)
+-- ** Rect
+, Rect(..)
+-- ** Cheby
+, Cheby(..)
 -- ** Hex
 , Hex(..)
 -- * Projections
@@ -35,10 +35,10 @@ import Data.Ix
 import Data.Hashable
 
 
-class (Eq v, Monoid v) => Tile v where
+class (Eq v, Monoid v) => Vertex v where
 
     -- | @distance a b == 0@ iff @a == b@
-    distance :: v -> v -> Integer
+    distance  :: v -> v -> Integer
 
     -- | Return a finite list of all indices at a given distance from the
     -- origin. @t `elem` enumDistance i@ iff @distance mempty t == i@.
@@ -52,20 +52,20 @@ class (Eq v, Monoid v) => Tile v where
 
 -- | Enumerate all indices in the coordinate system, in ascending order of
 -- distance from the origin. The resulting list is infinite.
-allIndices :: (Tile v) => [v]
+allIndices :: (Vertex v) => [v]
 allIndices = concatMap enumDistance [0..]
 
 -- | Return a finite list of all indices at a given distance or less from
 -- the origin.
-enumRange :: (Tile v) => Integer -> [v]
+enumRange :: (Vertex v) => Integer -> [v]
 enumRange = concatMap enumDistance . enumFromTo 0
 
 -- | Determine if two tiles are adjacent.
-adjacent :: (Tile v) => v -> v -> Bool
+adjacent :: (Vertex v) => v -> v -> Bool
 adjacent a b = distance a b == 1
 
 -- | @neighbors v@ enumerates every value @n@ for which @adjacent v n@.
-neighbors :: (Tile v) => v -> [v]
+neighbors :: (Vertex v) => v -> [v]
 neighbors v = map (v <>) (enumDistance 1)
 
 
@@ -73,7 +73,7 @@ neighbors v = map (v <>) (enumDistance 1)
 
 -- | @closerTo d a b@ compares the distance of @a@ to @d@ to the distance
 -- of @b@ to @d@.
-closerTo :: (Tile v) => v -> v -> v -> Ordering
+closerTo :: (Vertex v) => v -> v -> v -> Ordering
 closerTo to = comparing (distance to)
 
 
@@ -81,7 +81,7 @@ closerTo to = comparing (distance to)
 
 -- | @stepToward d s@ is the list of tiles adjacent to @s@ that are of
 -- minimal distance to @d@. @stepToward a a == []@.
-stepToward :: (Tile v) => v -> v -> [v]
+stepToward :: (Vertex v) => v -> v -> [v]
 stepToward to from
   | to == from = []
   | otherwise = closest
@@ -89,62 +89,57 @@ stepToward to from
     closest = minimumsWith (distance to) $ from : neighbors from
 
 -- | @pathsToward d s@ is the list of all minimal paths from @s@ to @d@.
-pathsToward :: (Tile v) => v -> v -> [[v]]
+pathsToward :: (Vertex v) => v -> v -> [[v]]
 pathsToward to = map stepPath . stepToward to
   where
     stepPath s = concatMap (s:) $ pathsToward to s
 
 
 -------------------------------------------------------------------------------
--- Quad tilings
+-- Rect tilings
 -------------------------------------------------------------------------------
 
--- | A tile with four neighbors; rectilinear distance.
-data Quad = Quad !Integer !Integer
+-- | A vertex with four neighbors (rectilinear/manhattan distance)
+data Rect = Rect !Integer !Integer
     deriving (Show, Eq, Ord, Ix)
 
-instance Monoid Quad where
-    mempty = Quad 0 0
-    Quad x y `mappend` Quad x' y' = Quad (x+x') (y+y')
+instance Monoid Rect where
+    mempty = Rect 0 0
+    Rect x y `mappend` Rect x' y' = Rect (x+x') (y+y')
 
-instance Hashable Quad where
-    hashWithSalt s (Quad i j) = hashWithSalt s (i, j)
+instance Hashable Rect where
+    hashWithSalt s (Rect i j) = hashWithSalt s (i, j)
 
-instance Tile Quad where
-    distance (Quad x y) (Quad x' y') = abs (x - x') + abs (y - y')
+instance Vertex Rect where
+    distance (Rect x y) (Rect x' y') = abs (x - x') + abs (y - y')
 
-    enumDistance 0 = [Quad 0 0]
+    enumDistance 0 = [Rect 0 0]
     enumDistance n =
-        [Quad i (n - abs i) | i <- reverse range]
-        ++ init (drop 1 [Quad i (-n + abs i) | i <- range])
+        [Rect i (n - abs i) | i <- reverse range]
+        ++ init (drop 1 [Rect i (-n + abs i) | i <- range])
       where
         range = [-n..n]
 
 
--------------------------------------------------------------------------------
--- Oct tilings
--------------------------------------------------------------------------------
 
--- | A tile with eight neighbors; chebyshev distance.
-data Oct = Oct !Integer !Integer
+-- | A vertex with eight neighbors (chebyshev distance)
+data Cheby = Cheby !Integer !Integer
     deriving (Show, Eq, Ord, Ix)
 
-instance Monoid Oct where
-    mempty = Oct 0 0
-    Oct x y `mappend` Oct x' y' = Oct (x+x') (y+y')
+instance Monoid Cheby where
+    mempty = Cheby 0 0
+    Cheby x y `mappend` Cheby x' y' = Cheby (x+x') (y+y')
 
-instance Hashable Oct where
-    hashWithSalt s (Oct i j) = hashWithSalt s (i, j)
+instance Hashable Cheby where
+    hashWithSalt s (Cheby i j) = hashWithSalt s (i, j)
 
-instance Tile Oct where
-    distance (Oct x y) (Oct x' y') = max (abs $ x - x') (abs $ y - y')
+instance Vertex Cheby where
+    distance (Cheby x y) (Cheby x' y') = max (abs $ x - x') (abs $ y - y')
 
     -- TODO: implement enumDistance
 
--------------------------------------------------------------------------------
--- Hexagonal tilings
--------------------------------------------------------------------------------
 
+-- | A vertex with size neighbors
 data Hex = Hex !Integer !Integer
     deriving (Show, Eq, Ord, Ix)
 
@@ -155,7 +150,7 @@ instance Monoid Hex where
 instance Hashable Hex where
     hashWithSalt s (Hex i j) = hashWithSalt s (i, j)
     
-instance Tile Hex where
+instance Vertex Hex where
     distance (Hex x y) (Hex x' y') = maximum $ map abs [dy, dx, dy - dx]
       where
         dx = x - x'
@@ -192,14 +187,14 @@ class Project a where
     queryPoint :: (Double, Double) -> a
     queryRect :: (Double, Double) -> (Double, Double) -> [a]
 
-instance Project Quad where
-    project (Quad x y) = (fromIntegral x, fromIntegral y)
-    queryPoint (x, y) = Quad (round x) (round y)
+instance Project Rect where
+    project (Rect x y) = (fromIntegral x, fromIntegral y)
+    queryPoint (x, y) = Rect (round x) (round y)
     queryRect a b = range (queryPoint a, queryPoint b)
 
-instance Project Oct where
-    project (Oct x y) = (fromIntegral x, fromIntegral y)
-    queryPoint (x, y) = Oct (round x) (round y)
+instance Project Cheby where
+    project (Cheby x y) = (fromIntegral x, fromIntegral y)
+    queryPoint (x, y) = Cheby (round x) (round y)
     queryRect a b = range (queryPoint a, queryPoint b)
 
 
