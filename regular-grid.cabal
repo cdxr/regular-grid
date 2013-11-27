@@ -12,8 +12,12 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 library
-  exposed-modules:     Data.Graph.Grid
-  -- other-modules:
+  exposed-modules:
+    Data.Graph.Grid
+    Data.Graph.Grid.Vertex
+    Data.Graph.Grid.Rect
+    Data.Graph.Grid.Cheby
+    Data.Graph.Grid.Hex
   build-depends:       base ==4.6.*, hashable ==1.2.*
 
 Test-Suite properties
