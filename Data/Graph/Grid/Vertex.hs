@@ -5,7 +5,7 @@ module Data.Graph.Grid.Vertex
     distance,
     enumDistance,
     -- ** Enumerations
-    allIndices,
+    allVertices,
     enumRange,
     -- ** Neighboring tiles
     neighbors,
@@ -22,36 +22,72 @@ import Data.Monoid
 import Data.Ord ( comparing )
 
 
+-- | A vertex in an infinite regular planar graph. Every vertex in the graph
+-- has the same number of neighbors. The set of vertices is recursively
+-- enumerable.
+--
 class (Eq v, Monoid v) => Vertex v where
 
-    -- | @distance a b == 0@ iff @a == b@
-    distance  :: v -> v -> Integer
-
-    -- | Return a finite list of all indices at a given distance from the
-    -- origin. @t `elem` enumDistance i@ iff @distance mempty t == i@.
+    -- | @distance a b@ is the positive integer distance between vertices @a@
+    -- and @b@.
     --
     -- @
-    -- enumDistance 0 = [mempty]
+    -- distance a b  =  distance b a
+    -- @
+    --
+    -- If there is no distance between two vertices, it is the same vertex.
+    --
+    -- @
+    -- distance a b == 0  =  a == b
+    -- @
+    --
+    distance  :: v -> v -> Integer
+
+    -- | Enumerate all vertices at a given distance from the origin.
+    --
+    -- @
+    -- v \`elem\` enumDistance d  =  distance mempty v == d
+    -- @
+    --
+    -- @
+    -- enumDistance 0  =  [mempty]
     -- @
     --
     enumDistance :: Integer -> [v]
 
 
--- | Enumerate all indices in the coordinate system, in ascending order of
+-- | Enumerate all vertices in the graph, in ascending order of
 -- distance from the origin. The resulting list is infinite.
-allIndices :: (Vertex v) => [v]
-allIndices = concatMap enumDistance [0..]
+allVertices :: (Vertex v) => [v]
+allVertices = concatMap enumDistance [0..]
 
--- | Return a finite list of all indices at a given distance or less from
--- the origin.
+
+-- | Enumerate all vertices at a given distance or less from the origin.
+--
+-- @
+-- enumRange i = takeWhile ((<= i) . distance) . allVertices
+-- @
+--
 enumRange :: (Vertex v) => Integer -> [v]
 enumRange = concatMap enumDistance . enumFromTo 0
 
--- | Determine if two tiles are adjacent.
+
+-- | Determine if two vertices are adjacent.
+--
+-- @
+-- adjacent a b  =  distance a b == 1
+-- @
+--
 adjacent :: (Vertex v) => v -> v -> Bool
 adjacent a b = distance a b == 1
 
--- | @neighbors v@ enumerates every value @n@ for which @adjacent v n@.
+
+-- | @neighbors v@ enumerates all vertices adjacent to @v@.
+--
+-- @
+-- a \`elem\` neighbors b  =  adjacent a b 
+-- @
+--
 neighbors :: (Vertex v) => v -> [v]
 neighbors v = map (v <>) (enumDistance 1)
 
@@ -66,8 +102,8 @@ closerTo to = comparing (distance to)
 
 -- TODO IMPROVE
 
--- | @stepToward d s@ is the list of tiles adjacent to @s@ that are of
--- minimal distance to @d@. @stepToward a a == []@.
+-- | @stepToward v s@ is the list of vertices adjacent to @s@ that are
+-- closest to @d@. @stepToward a a == []@.
 stepToward :: (Vertex v) => v -> v -> [v]
 stepToward to from
   | to == from = []
