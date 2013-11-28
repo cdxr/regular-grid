@@ -26,6 +26,8 @@ instance Hashable Hex where
     hashWithSalt s (Hex i j) = hashWithSalt s (i, j)
     
 instance Vertex Hex where
+    degree _ = 6
+
     distance (Hex x y) (Hex x' y') = maximum $ map abs [dy, dx, dy - dx]
       where
         dx = x - x'

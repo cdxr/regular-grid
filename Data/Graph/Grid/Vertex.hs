@@ -1,9 +1,7 @@
 module Data.Graph.Grid.Vertex
 (
     -- * Vertex
-    Vertex,
-    distance,
-    enumDistance,
+    Vertex(..),
     -- ** Enumerations
     allVertices,
     enumRange,
@@ -27,6 +25,9 @@ import Data.Ord ( comparing )
 -- enumerable.
 --
 class (Eq v, Monoid v) => Vertex v where
+
+    -- | The number of neighbors of any vertex in the graph
+    degree :: proxy v -> Int   
 
     -- | @distance a b@ is the positive integer distance between vertices @a@
     -- and @b@.
@@ -54,7 +55,7 @@ class (Eq v, Monoid v) => Vertex v where
     -- @
     --
     enumDistance :: Integer -> [v]
-
+    
 
 -- | Enumerate all vertices in the graph, in ascending order of
 -- distance from the origin. The resulting list is infinite.
@@ -83,6 +84,10 @@ adjacent a b = distance a b == 1
 
 
 -- | @neighbors v@ enumerates all vertices adjacent to @v@.
+--
+-- @
+-- length (neighbors v)  =  degree v
+-- @
 --
 -- @
 -- a \`elem\` neighbors b  =  adjacent a b 

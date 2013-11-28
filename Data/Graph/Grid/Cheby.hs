@@ -24,6 +24,8 @@ instance Hashable Cheby where
     hashWithSalt s (Cheby i j) = hashWithSalt s (i, j)
 
 instance Vertex Cheby where
+    degree _ = 8
+
     distance (Cheby x y) (Cheby x' y') = max (abs $ x - x') (abs $ y - y')
 
     -- TODO: implement enumDistance

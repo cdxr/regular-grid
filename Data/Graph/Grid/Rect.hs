@@ -24,6 +24,8 @@ instance Hashable Rect where
     hashWithSalt s (Rect i j) = hashWithSalt s (i, j)
 
 instance Vertex Rect where
+    degree _ = 4
+
     distance (Rect x y) (Rect x' y') = abs (x - x') + abs (y - y')
 
     enumDistance 0 = [Rect 0 0]
