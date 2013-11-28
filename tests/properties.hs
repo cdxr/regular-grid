@@ -35,18 +35,21 @@ testDistanceElems _ (Positive i) =
     mapSize (const 20) $   -- test only up to a distance of 20
         all ((==) i . distance mempty) (enumDistance i :: [a])
 
-testAdjacent :: (Vertex a) => a -> Bool
-testAdjacent t = all (adjacent t) (neighbors t)
+testNeighbors :: forall a. (Vertex a) => a -> Property
+testNeighbors v = all (adjacent v) ns
+             .&&. length ns == degree (Proxy :: Proxy a)
+  where
+    ns = neighbors v
 
 
 prop_rect_distance_0 = testDistance0     (Proxy :: Proxy Rect)
 prop_rect_dist_elems = testDistanceElems (Proxy :: Proxy Rect)
-prop_rect_adjacent   = testAdjacent      :: Rect -> Bool
+prop_rect_neighbors  = testNeighbors      :: Rect -> Property
 
 prop_cheby_distance_0  = testDistance0     (Proxy :: Proxy Cheby)
 prop_cheby_dist_elems  = testDistanceElems (Proxy :: Proxy Cheby)
-prop_cheby_adjacent    = testAdjacent      :: Cheby -> Bool
+prop_cheby_neighbors   = testNeighbors      :: Cheby -> Property
 
 prop_hex_distance_0  = testDistance0     (Proxy :: Proxy Hex)
 prop_hex_dist_elems  = testDistanceElems (Proxy :: Proxy Hex)
-prop_hex_adjacent    = testAdjacent      :: Hex -> Bool
+prop_hex_neighbors   = testNeighbors      :: Hex -> Property
