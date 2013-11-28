@@ -18,6 +18,7 @@ library
     Data.Graph.Grid.Rect
     Data.Graph.Grid.Cheby
     Data.Graph.Grid.Hex
+    Data.Graph.Grid.Projection
   build-depends:       base ==4.6.*, hashable ==1.2.*
 
 Test-Suite properties

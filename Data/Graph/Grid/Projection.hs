@@ -1,5 +1,7 @@
 module Data.Graph.Grid.Projection where
 
+import Data.Ix
+
 import Data.Graph.Grid
 
 
