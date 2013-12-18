@@ -1,5 +1,5 @@
 name:                regular-grid
-version:             0.1.0.1
+version:             0.2.0.1
 synopsis:            operations on regular planar graphs
 -- description:         
 license:             BSD3
@@ -13,12 +13,11 @@ cabal-version:       >=1.8
 
 library
   exposed-modules:
-    Data.Graph.Grid
-    Data.Graph.Grid.Vertex
-    Data.Graph.Grid.Rect
-    Data.Graph.Grid.Cheby
-    Data.Graph.Grid.Hex
-    Data.Graph.Grid.Projection
+    Data.Grid
+    Data.Grid.Vertex
+    Data.Grid.Rect
+    Data.Grid.Cheby
+    Data.Grid.Hex
   build-depends:       base ==4.6.*, hashable ==1.2.*
 
 Test-Suite properties

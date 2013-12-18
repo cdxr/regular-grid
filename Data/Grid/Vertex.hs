@@ -1,4 +1,4 @@
-module Data.Graph.Grid.Vertex
+module Data.Grid.Vertex
 (
     -- * Vertex
     Vertex(..),

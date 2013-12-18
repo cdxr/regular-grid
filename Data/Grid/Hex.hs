@@ -1,9 +1,9 @@
-module Data.Graph.Grid.Hex
+module Data.Grid.Hex
 (
     Hex(..),
     projectHorizontal,
     projectVertical,
-    module Data.Graph.Grid.Vertex,
+    module Data.Grid.Vertex,
 )
 where
 
@@ -11,7 +11,7 @@ import Data.Monoid
 import Data.Ix
 import Data.Hashable
 
-import Data.Graph.Grid.Vertex
+import Data.Grid.Vertex
 
 
 -- | A vertex with six neighbors

@@ -1,7 +1,7 @@
-module Data.Graph.Grid.Rect
+module Data.Grid.Rect
 (
     Rect(..),
-    module Data.Graph.Grid.Vertex,
+    module Data.Grid.Vertex,
 )
 where
 
@@ -9,7 +9,7 @@ import Data.Monoid
 import Data.Ix
 import Data.Hashable
 
-import Data.Graph.Grid.Vertex
+import Data.Grid.Vertex
 
 
 -- | A vertex with four neighbors (rectilinear/manhattan distance)
