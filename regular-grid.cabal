@@ -1,5 +1,5 @@
 name:                regular-grid
-version:             0.2.0.1
+version:             0.3.0.0
 synopsis:            operations on regular planar graphs
 -- description:         
 license:             BSD3
@@ -18,7 +18,7 @@ library
     Data.Grid.Rect
     Data.Grid.Cheby
     Data.Grid.Hex
-  build-depends:       base ==4.6.*, hashable ==1.2.*
+  build-depends:       base, hashable >=1.2 && <1.3
 
 Test-Suite properties
     type:               exitcode-stdio-1.0
@@ -27,6 +27,6 @@ Test-Suite properties
     hs-source-dirs:     tests
     build-depends:      regular-grid,
                         base,
-                        QuickCheck        ==2.6.*,
+                        QuickCheck        >=2.7 && <3,
                         tasty-th          ==0.1.*,
-                        tasty-quickcheck  ==0.3.*
+                        tasty-quickcheck  >=0.8 && <1
